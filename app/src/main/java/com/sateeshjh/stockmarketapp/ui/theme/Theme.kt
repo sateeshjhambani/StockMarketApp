@@ -1,30 +1,19 @@
 package com.sateeshjh.stockmarketapp.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import com.sateeshjh.stockmarketapp.ui.theme.DarkBlue
+import com.sateeshjh.stockmarketapp.ui.theme.TextWhite
 
-private val DarkColorPalette = darkColorScheme(
-    primary = Purple200,
-    inversePrimary = Purple700,
-    secondary = Teal200
-)
-
-private val LightColorPalette = lightColorScheme(
-    primary = Purple500,
-    inversePrimary = Purple700,
-    secondary = Teal200
-
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
+private val DarkColorPalette = darkColors(
+    primary = Color.Green,
+    background = DarkBlue,
+    onPrimary = Color.DarkGray,
+    onBackground = TextWhite
 )
 
 @Composable
@@ -32,14 +21,8 @@ fun StockMarketAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
-
     MaterialTheme(
-        colorScheme = colors,
+        colors = DarkColorPalette,
         typography = Typography,
         shapes = Shapes,
         content = content

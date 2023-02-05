@@ -17,10 +17,10 @@ import javax.inject.Singleton
 
 @Singleton
 class StockRepositoryImpl @Inject constructor(
-    val api: StockApi,
-    val db: StockDatabase,
-    val companyListingsParser: CSVParser<CompanyListing>
-) : StockRepository {
+    private val api: StockApi,
+    private val db: StockDatabase,
+    private val companyListingsParser: CSVParser<CompanyListing>,
+): StockRepository {
 
     private val dao = db.dao
 
@@ -29,35 +29,28 @@ class StockRepositoryImpl @Inject constructor(
         query: String
     ): Flow<Resource<List<CompanyListing>>> {
         return flow {
-            emit(Resource.Loading(isLoading = true))
-
+            emit(Resource.Loading(true))
             val localListings = dao.searchCompanyListing(query)
             emit(Resource.Success(
-                data = localListings.map {
-                    it.toCompanyListing()
-                }
+                data = localListings.map { it.toCompanyListing() }
             ))
 
-            val isDbEmpty = localListings.isEmpty() && query.isBlank() // all company listings
+            val isDbEmpty = localListings.isEmpty() && query.isBlank()
             val shouldJustLoadFromCache = !isDbEmpty && !fetchFromRemote
-
-            if (shouldJustLoadFromCache) {
-                emit(
-                    Resource.Loading(isLoading = false)
-                )
+            if(shouldJustLoadFromCache) {
+                emit(Resource.Loading(false))
                 return@flow
             }
-
             val remoteListings = try {
                 val response = api.getListings()
                 companyListingsParser.parse(response.byteStream())
-            } catch (e: IOException) {
+            } catch(e: java.io.IOException) {
                 e.printStackTrace()
-                emit(Resource.Error(message = "Couldn't load the data"))
+                emit(Resource.Error("Couldn't load data"))
                 null
             } catch (e: HttpException) {
                 e.printStackTrace()
-                emit(Resource.Error(message = "Couldn't load the data"))
+                emit(Resource.Error("Couldn't load data"))
                 null
             }
 
@@ -67,10 +60,9 @@ class StockRepositoryImpl @Inject constructor(
                     listings.map { it.toCompanyListingEntity() }
                 )
                 emit(Resource.Success(
-                    dao.searchCompanyListing("")
-                        .map {
-                            it.toCompanyListing()
-                        }
+                    data = dao
+                        .searchCompanyListing("")
+                        .map { it.toCompanyListing() }
                 ))
                 emit(Resource.Loading(false))
             }

@@ -16,25 +16,27 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CompanyListingsViewModel @Inject constructor(
-    private val repository: StockRepository,
-): ViewModel() {
+    private val repository: StockRepository
+) : ViewModel() {
 
     var state by mutableStateOf(CompanyListingsState())
 
     private var searchJob: Job? = null
 
+    init {
+        getCompanyListings()
+    }
+
     fun onEvent(event: CompanyListingsEvent) {
-        when(event) {
+        when (event) {
             is CompanyListingsEvent.Refresh -> {
                 getCompanyListings(fetchFromRemote = true)
             }
             is CompanyListingsEvent.OnSearchQueryChange -> {
-                state = state.copy(
-                    searchQuery = event.query
-                )
+                state = state.copy(searchQuery = event.query)
                 searchJob?.cancel()
                 searchJob = viewModelScope.launch {
-                    delay(500) // only fetch result if user hasn't typed for 500 ms or more
+                    delay(500L)
                     getCompanyListings()
                 }
             }
@@ -48,7 +50,7 @@ class CompanyListingsViewModel @Inject constructor(
         viewModelScope.launch {
             repository
                 .getCompanyListings(fetchFromRemote, query)
-                .collectLatest { result ->
+                .collect { result ->
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let { listings ->
@@ -59,9 +61,7 @@ class CompanyListingsViewModel @Inject constructor(
                         }
                         is Resource.Error -> Unit
                         is Resource.Loading -> {
-                            state = state.copy(
-                                isLoading = result.isLoading
-                            )
+                            state = state.copy(isLoading = result.isLoading)
                         }
                     }
                 }
