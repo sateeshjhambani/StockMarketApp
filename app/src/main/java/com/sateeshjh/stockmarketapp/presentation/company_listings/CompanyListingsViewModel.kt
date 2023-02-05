@@ -49,7 +49,7 @@ class CompanyListingsViewModel @Inject constructor(
             repository
                 .getCompanyListings(fetchFromRemote, query)
                 .collectLatest { result ->
-                    when(result) {
+                    when (result) {
                         is Resource.Success -> {
                             result.data?.let { listings ->
                                 state = state.copy(
