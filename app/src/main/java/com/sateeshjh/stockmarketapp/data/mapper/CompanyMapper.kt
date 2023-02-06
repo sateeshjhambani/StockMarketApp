@@ -1,6 +1,8 @@
 package com.sateeshjh.stockmarketapp.data.mapper
 
 import com.sateeshjh.stockmarketapp.data.local.CompanyListingEntity
+import com.sateeshjh.stockmarketapp.data.remote.dto.CompanyInfoDto
+import com.sateeshjh.stockmarketapp.domain.model.CompanyInfo
 import com.sateeshjh.stockmarketapp.domain.model.CompanyListing
 
 fun CompanyListingEntity.toCompanyListing(): CompanyListing {
@@ -16,5 +18,15 @@ fun CompanyListing.toCompanyListingEntity(): CompanyListingEntity {
         name = name,
         symbol = symbol,
         exchange = exchange,
+    )
+}
+
+fun CompanyInfoDto.toCompanyInfo(): CompanyInfo {
+    return CompanyInfo(
+        symbol = symbol ?: "",
+        description = description ?: "",
+        name = name ?: "",
+        country = country ?: "",
+        industry = industry ?: ""
     )
 }

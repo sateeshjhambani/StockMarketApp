@@ -2,10 +2,13 @@ package com.sateeshjh.stockmarketapp.data.repository
 
 import com.sateeshjh.stockmarketapp.data.csv.CSVParser
 import com.sateeshjh.stockmarketapp.data.local.StockDatabase
+import com.sateeshjh.stockmarketapp.data.mapper.toCompanyInfo
 import com.sateeshjh.stockmarketapp.data.mapper.toCompanyListing
 import com.sateeshjh.stockmarketapp.data.mapper.toCompanyListingEntity
 import com.sateeshjh.stockmarketapp.data.remote.StockApi
+import com.sateeshjh.stockmarketapp.domain.model.CompanyInfo
 import com.sateeshjh.stockmarketapp.domain.model.CompanyListing
+import com.sateeshjh.stockmarketapp.domain.model.IntradayInfo
 import com.sateeshjh.stockmarketapp.domain.repository.StockRepository
 import com.sateeshjh.stockmarketapp.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +23,8 @@ class StockRepositoryImpl @Inject constructor(
     private val api: StockApi,
     private val db: StockDatabase,
     private val companyListingsParser: CSVParser<CompanyListing>,
-): StockRepository {
+    private val intradayInfoParser: CSVParser<IntradayInfo>,
+) : StockRepository {
 
     private val dao = db.dao
 
@@ -37,14 +41,14 @@ class StockRepositoryImpl @Inject constructor(
 
             val isDbEmpty = localListings.isEmpty() && query.isBlank()
             val shouldJustLoadFromCache = !isDbEmpty && !fetchFromRemote
-            if(shouldJustLoadFromCache) {
+            if (shouldJustLoadFromCache) {
                 emit(Resource.Loading(false))
                 return@flow
             }
             val remoteListings = try {
                 val response = api.getListings()
                 companyListingsParser.parse(response.byteStream())
-            } catch(e: java.io.IOException) {
+            } catch (e: java.io.IOException) {
                 e.printStackTrace()
                 emit(Resource.Error("Couldn't load data"))
                 null
@@ -66,6 +70,41 @@ class StockRepositoryImpl @Inject constructor(
                 ))
                 emit(Resource.Loading(false))
             }
+        }
+    }
+
+    override suspend fun getIntradayInfo(symbol: String): Resource<List<IntradayInfo>> {
+        return try {
+            val response = api.getIntradayInfo(symbol)
+            val results = intradayInfoParser.parse(response.byteStream())
+            Resource.Success(results)
+        } catch (e: java.io.IOException) {
+            e.printStackTrace()
+            Resource.Error(
+                message = "Couldn't load intraday info"
+            )
+        } catch (e: HttpException) {
+            e.printStackTrace()
+            Resource.Error(
+                message = "Couldn't load intraday info"
+            )
+        }
+    }
+
+    override suspend fun getCompanyInfo(symbol: String): Resource<CompanyInfo> {
+        return try {
+            val result = api.getCompanyInfo(symbol)
+            Resource.Success(result.toCompanyInfo())
+        } catch (e: java.io.IOException) {
+            e.printStackTrace()
+            Resource.Error(
+                message = "Couldn't load company info"
+            )
+        } catch (e: HttpException) {
+            e.printStackTrace()
+            Resource.Error(
+                message = "Couldn't load company info"
+            )
         }
     }
 }

@@ -29,9 +29,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideStockDatabase(
-        app: Application
-    ): StockDatabase {
+    fun provideStockDatabase(app: Application): StockDatabase {
         return Room.databaseBuilder(
             app,
             StockDatabase::class.java,
