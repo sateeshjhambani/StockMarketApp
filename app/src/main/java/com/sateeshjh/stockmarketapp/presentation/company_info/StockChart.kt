@@ -5,10 +5,10 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sateeshjh.stockmarketapp.domain.model.IntradayInfo
 import kotlin.math.round
@@ -65,6 +65,7 @@ fun StockChart(
             }
         }
 
+        var lastX = 0f
         val strokePath = Path().apply {
             val height = size.height
             for (i in infos.indices) {
@@ -80,7 +81,37 @@ fun StockChart(
                 if (i == 0) {
                     moveTo(x1, y1)
                 }
+                lastX = (x1 + x2) / 2f
+                quadraticBezierTo(
+                    x1, y1, lastX, (y1 + y2) / 2f
+                )
             }
         }
+        val fillPath = android.graphics.Path(strokePath.asAndroidPath())
+            .asComposePath()
+            .apply {
+                lineTo(lastX, size.height - spacing)
+                lineTo(spacing, size.height - spacing)
+                close()
+            }
+
+        drawPath(
+            path = fillPath,
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    transparentGraphColor,
+                    Color.Transparent,
+                ),
+                endY = size.height - spacing
+            )
+        )
+        drawPath(
+            path = strokePath,
+            color = graphColor,
+            style = Stroke(
+                width = 3.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+        )
     }
 }
