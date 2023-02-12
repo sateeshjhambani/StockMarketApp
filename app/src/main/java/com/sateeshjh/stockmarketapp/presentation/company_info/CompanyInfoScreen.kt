@@ -2,10 +2,13 @@ package com.sateeshjh.stockmarketapp.presentation.company_info
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
@@ -85,6 +88,19 @@ fun CompanyInfoScreen(
                         .align(CenterHorizontally)
                 )
             }
+        }
+    }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Center,
+    ) {
+        if (state.isLoading) {
+            CircularProgressIndicator()
+        } else if (state.error != null) {
+            Text(
+                text = state.error,
+                color = MaterialTheme.colors.error
+            )
         }
     }
 }
