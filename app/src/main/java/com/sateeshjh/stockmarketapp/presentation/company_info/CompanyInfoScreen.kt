@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +73,18 @@ fun CompanyInfoScreen(
                 fontSize = 12.sp,
                 modifier = Modifier.fillMaxWidth(),
             )
+            if (state.stockInfos.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Marker Summary")
+                Spacer(modifier = Modifier.height(16.dp))
+                StockChart(
+                    infos = state.stockInfos,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .align(CenterHorizontally)
+                )
+            }
         }
     }
 }
